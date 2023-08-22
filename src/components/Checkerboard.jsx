@@ -3,14 +3,18 @@ import React, { useState } from "react";
 function Checkerboard() {
     const width = 12;
     const height = 6;
-    const [selectedSquares, setSelectedSquares] = useState([]);
+    const [selectedSquares, setSelectedSquares] = useState(null);
 
     const toggleSelection = (index) => {
-        if (selectedSquares.includes(index)) {
-            setSelectedSquares(selectedSquares.filter(i => i !== index));
+        if (selectedSquares === index) {
+            setSelectedSquares(null);
         } else {
-            setSelectedSquares([...selectedSquares, index]);
+            setSelectedSquares(index);
         }
+    }
+
+    const handleInput = (index) => {
+        return null
     }
 
     return (
@@ -19,7 +23,7 @@ function Checkerboard() {
                 const row = Math.floor(index / width);
                 const col = index % width;
                 const isGray = (row + col) % 2 === 0;
-                const isSelected = selectedSquares.includes(index);
+                const isSelected = selectedSquares === index;
 
                 return (
                     <div
