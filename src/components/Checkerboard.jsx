@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import Arrow from "../assets/next-arrow-svgrepo-com.svg"
-import App from '../App.jsx'
 
 function Checkerboard({onGoToMenu}) {
     const width = 12;
@@ -147,7 +146,7 @@ function Checkerboard({onGoToMenu}) {
                                 </div>
                             }
                             {mousePos === index &&
-                                <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="absolute inset-0 flex items-center justify-center ">
                                     <div className="block text-8xl">
                                         🐭
                                     </div>
