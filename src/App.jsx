@@ -1,7 +1,8 @@
-import React, { useState } from 'react';  // don't forget to import useState
+import React, { useState } from 'react';  
 import Checkerboard from './components/Checkerboard';
 import Menu from './components/Menu';
-import Levels from './components/Levels';  // import the Levels component
+import Levels from './components/Levels';  
+import './App.css';
 
 function App() {
   const [isGameActive, setIsGameActive] = useState(false);

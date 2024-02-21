@@ -1,73 +1,87 @@
 import React, { useState, useEffect } from "react";
 import Arrow from "../assets/next-arrow-svgrepo-com.svg"
 
-function Checkerboard({onGoToMenu}) {
-    const width = 12;
+function Checkerboard({ onGoToMenu }) {
+    const width = 6;
     const height = 6;
     const [selectedSquares, setSelectedSquares] = useState(null);
     const [arrowStored, setArrowStored] = useState([]);
     const [mousePos, setMousePos] = useState(0);
     const [mouseDirection, setMouseDirection] = useState('right');
     const [speed, setSpeed] = useState(400);
+    const [boardConfig, setBoardConfig] = useState([]);
+    const [goalPos, setGoalPos] = useState(null);
+    const [isPlaying, setIsPlaying] = useState(false);
 
     useEffect(() => {
-        const moveMouse = () => {
-            let currentDirection = mouseDirection;
-            const currentArrow = arrowStored.find(arrow => arrow.index === mousePos);
-            if (currentArrow) {
-                currentDirection = currentArrow.direction;
-            }
+        const newBoardConfig = Array.from({ length: width * height }, (_, i) => 1);
+        newBoardConfig[5] = 0;
+        newBoardConfig[30] = 2;
+        newBoardConfig[12] = 3
+        newBoardConfig[17] = 3
+        setBoardConfig(newBoardConfig);
+        setGoalPos(30);
+    }, []);
 
-            let newRow = Math.floor(mousePos / width);
-            let newCol = mousePos % width;
+    useEffect(() => {
+        if (isPlaying) {
+            const moveMouse = () => {
+                let currentDirection = mouseDirection;
+                const currentArrow = arrowStored.find(arrow => arrow.index === mousePos);
+                if (currentArrow) {
+                    currentDirection = currentArrow.direction;
+                }
 
-            let hitWall = false;
+                let newRow = Math.floor(mousePos / width);
+                let newCol = mousePos % width;
+                let hitWall = false;
 
-            switch (currentDirection) {
-                case 'up':
-                    if (newRow === 0) hitWall = true;
-                    newRow = Math.max(0, newRow - 1);
-                    break;
-                case 'down':
-                    if (newRow === height - 1) hitWall = true;
-                    newRow = Math.min(height - 1, newRow + 1);
-                    break;
-                case 'left':
-                    if (newCol === 0) hitWall = true;
-                    newCol = Math.max(0, newCol - 1);
-                    break;
-                case 'right':
-                    if (newCol === width - 1) hitWall = true;
-                    newCol = Math.min(width - 1, newCol + 1);
-                    break;
-                default:
-                    break;
-            }
+                switch (currentDirection) {
+                    case 'up':
+                        newRow = newRow - 1;
+                        break;
+                    case 'down':
+                        newRow = newRow + 1;
+                        break;
+                    case 'left':
+                        newCol = newCol - 1;
+                        break;
+                    case 'right':
+                        newCol = newCol + 1;
+                        break;
+                    default:
+                        break;
+                }
 
-            if (hitWall) {
-                const directions = ['up', 'right', 'down', 'left'];
-                const currentIdx = directions.indexOf(currentDirection);
-                currentDirection = directions[(currentIdx + 1) % 4];
-                setSpeed(0);
-            } else {
-                setSpeed(400);
-            }
 
-            setMousePos(newRow * width + newCol);
-            setMouseDirection(currentDirection);
+                if (newRow < 0 || newRow >= height || newCol < 0 || newCol >= width || boardConfig[newRow * width + newCol] === 3) {
+                    hitWall = true;
+                }
 
-        };
+                if (hitWall) {
+                    const directions = ['up', 'right', 'down', 'left'];
+                    const currentIdx = directions.indexOf(currentDirection);
+                    currentDirection = directions[(currentIdx + 1) % 4];
+                    setSpeed(0);
+                } else {
+                    setMousePos(newRow * width + newCol);
+                    setSpeed(400);
+                }
 
-        const timer = setInterval(moveMouse, speed);
+                setMouseDirection(currentDirection);
+            };
 
-        return () => clearInterval(timer);
-    }, [mousePos, mouseDirection, arrowStored, speed]);
+            const timer = setInterval(moveMouse, speed);
+            return () => clearInterval(timer);
+        }
+    }, [mousePos, mouseDirection, arrowStored, speed, isPlaying]);
 
 
     const toggleSelection = (index) => {
         if (selectedSquares === index) {
             setSelectedSquares(null);
-        } else {
+        }
+        else {
             setSelectedSquares(index);
         }
     }
@@ -110,17 +124,15 @@ function Checkerboard({onGoToMenu}) {
     };
 
     return (
-        <div className="">
-            <button
-                onClick={onGoToMenu}
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-3 focus:outline-none focus:shadow-outline">
-                Menu
-            </button>
-            <div className="grid grid-cols-12 gap-0"
+
+        <div className="flex flex-col w-screen h-full bg-gray-700">
+            <div className="text-7xl mb-10 font-extrabold self-center text-white">Level 1</div>
+            <div className="grid place-self-center grid-cols-6 gap-0"
                 tabIndex={0}
                 onKeyDown={handleInput}
             >
-                {Array.from({ length: width * height }).map((_, index) => {
+                {boardConfig.map((value, index) => {
+
                     const row = Math.floor(index / width);
                     const col = index % width;
                     const isGray = (row + col) % 2 === 0;
@@ -131,30 +143,60 @@ function Checkerboard({onGoToMenu}) {
                         <div
                             key={index}
                             className={`w-32 h-32 relative p-0 m-0 cursor-pointer transition duration-300 ease-in
-                        ${isSelected ? 'border-4 border-blue-500' : 'hover:border-4 hover:border-blue-500'} 
-                        ${isGray ? 'bg-[#eeb3ef]' : 'bg-[#92eef2]'}`
+                        ${isSelected ? 'border-4 border-x-yellow-300' : 'hover:border-4 hover:border-blue-500'} 
+                        ${isGray ? 'bg-[#93AED9]' : 'bg-[#558ADF]'}`
                             }
                             onClick={() => toggleSelection(index)}
                         >
                             {storedArrow &&
                                 <div className="absolute inset-0 flex items-center justify-center">
-                                    <div className={`block w-[120px] h-[120px] bg-[#0200d4]  
+                                    <div className={`block w-[120px] h-[120px] bg-gradient-to-r from-[#2C4773] to-[#829ABF]
                                                 transform ${getTransform(storedArrow.direction)}`}
                                     >
                                         <img src={Arrow} alt="arrow" draggable="false" />
                                     </div>
                                 </div>
                             }
+                            {value === 3 &&
+                                <div className=" absolute inset-0 pointer-events-none bg-[#374151]">
+                                </div>
+                            }
                             {mousePos === index &&
-                                <div className="absolute inset-0 flex items-center justify-center ">
+                                <div className="absolute z-10 inset-0 flex items-center justify-center ">
                                     <div className="block text-8xl">
                                         🐭
                                     </div>
                                 </div>
                             }
+                            {goalPos === index &&
+                                <div className="absolute inset-0 flex items-center justify-center ">
+                                    <div className="block text-8xl">
+                                        🧀
+                                    </div>
+                                </div>
+                            }
+
                         </div>
                     );
                 })}
+            </div>
+            <div className="flex justify-center gap-10  pt-6">
+                <button
+                    onClick={onGoToMenu}
+                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-3 focus:outline-none focus:shadow-outline">
+                    Menu
+                </button>
+                <button
+                    onClick={() => { setIsPlaying(false); setMousePos(0); setMouseDirection('right'); setArrowStored([]) }
+                    }
+                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-3 focus:outline-none focus:shadow-outline">
+                    Reset
+                </button>
+                <button
+                    onClick={() => setIsPlaying(true)}
+                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-3 focus:outline-none focus:shadow-outline">
+                    Play
+                </button>
             </div>
         </div>
     );
